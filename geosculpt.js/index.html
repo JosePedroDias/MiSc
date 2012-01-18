@@ -1,0 +1,364 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<!--
+		TODOs:
+		
+		_getEdgeLoop()
+		_getFaceLoop() estão errados!
+		
+		gs1.html
+		splitFaceLoop (corte errado!)
+		ext delta (ponto infinito?)
+		record params into history
+		
+		Shape:
+		multicolor
+		record transformation along updateStructure
+		
+		Camera:
+		rotate around center (theta, phi) and distance (rho)
+		-->
+		<title>geoSculpt 1</title>
+		
+		<script type="text/javascript" src="Three.js"></script>
+		
+		<script type="text/javascript" src="OrderedPair.js"></script>
+		<script type="text/javascript" src="Shape.js"></script>
+		<script type="text/javascript" src="Box.js"></script>
+		<script type="text/javascript" src="ShapeMemento.js"></script>
+		<script type="text/javascript" src="VerticesViewer.js"></script>
+		
+		<style type="text/css">
+			/* FONT RESETTING FROM http://yui.yahooapis.com/2.8.2r1/build/fonts/fonts-min.css */
+			body{font:13px/1.231 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}
+			select,input,button,textarea,button{font:99% arial,helvetica,clean,sans-serif;}
+			table{font-size:inherit;font:100%;}
+			pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}
+			
+			#cnt {
+				cursor: crosshair;
+			}
+			
+			#toolbar {
+				float: left;
+				padding-left: 8px;
+			}
+			
+			.toolHeader {
+				font-weight: bold;
+				padding: 16px 0px 8px 4px;
+			}
+			
+			#toolbar label {
+				display: inline-table;
+				width: 60px;
+			}
+			
+			#toolbar button {
+				background-color: #EEE;
+				color: #000;
+				border: 1px solid #AAA;
+				border-radius: 6px;
+			}
+			
+			#toolbar input {
+				background-color: #FFF;
+				color: #000;
+				border: 1px solid #AAA;
+				border-radius: 6px;
+				text-align: right;
+				padding: 2px 4px 2px 4px;
+				width: 30px;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div id="toolbar">
+		
+			<div class="toolHeader">general</div>
+			<div class="tools">
+				<button onclick="op('genUndo')">undo</button>
+				<button onclick="op('genRedo')">redo</button>
+				<!--<button onclick="op('genLoad')">load</button>
+				<button onclick="op('genSave')">save</button>-->
+			</div>
+		
+			<div class="toolHeader">move face</div>
+			<div class="tools">
+				<button onclick="op('mvFcOut')">outwards</button>
+				<button onclick="op('mvFcDir')">direction (0-1)</button>
+				<button onclick="op('mvFcDlt')">delta</button>
+			</div>
+			
+			<div class="toolHeader">extrude / bevel</div>
+			<div class="tools">
+				<button onclick="op('extrude')">extrude</button>
+				<button onclick="op('bevelEx')">bevel ext.</button>
+				<button onclick="op('extDlt')">ext. delta</button>
+				<button onclick="op('bevel')">bevel</button>
+			</div>
+			
+			<div class="toolHeader">edge</div>
+			<div class="tools">
+				<button onclick="op('splitFL')">split f. l.</button>
+				<button onclick="op('mvEdOut')">mv. out.</button>
+				<button onclick="op('mvEdDlt')">mv. delta</button>
+				<button onclick="op('mvEdDst')">mv. dist.</button>
+			</div>
+			
+			<div class="toolHeader">params</div>
+			<div class="tools">
+				<label for="paramDst">distance:</label><input id="paramDst" type="text" value="50"><br/>
+				<label for="paramDlt">delta:</label>
+					<input id="paramDlt1" type="text" value="0">
+					<input id="paramDlt2" type="text" value="100">
+					<input id="paramDlt3" type="text" value="0"><br/>
+				<label for="paramDir">direction:</label><input id="paramDir" type="text" value="0">
+			</div>
+			
+		</div>
+		
+		<div id="cnt" style="margin:auto auto; width:640px; height:480px; border:1px solid #CCC"></div>
+		
+		<script type="text/javascript">
+
+
+
+if (!window.requestAnimationFrame) {
+	window.requestAnimationFrame = window.webkitRequestAnimationFrame			||
+		window.mozRequestAnimationFrame											||
+		window.oRequestAnimationFrame											||
+		window.msRequestAnimationFrame											||
+		function(callback, element) {window.setTimeout(callback, 1000 / 30);};
+}
+
+var container = document.getElementById('cnt');
+var camera, scene, renderer, projector = new THREE.Projector();
+var obj, pln, vVwr, objRotSpd = 0;
+
+var winDims = [container.offsetWidth, container.offsetHeight];
+var winHalfW = winDims[0] / 2;
+var mouseFaceIds = [undefined, undefined];
+var opHistory = {past:[], future:[]};
+
+function init() {
+	//renderer = new THREE.CanvasRenderer();
+	renderer = new THREE.WebGLRenderer();
+	renderer.setSize(winDims[0], winDims[1]);
+	
+	scene = new THREE.Scene();
+	
+	camera = new THREE.Camera(70, winDims[0]/winDims[1], 1, 1000);
+	camera.position.y = 250;
+	camera.position.z = 500;
+	camera.target.position.y = 0;
+	
+	// lights
+	//scene.addLight( new THREE.AmbientLight( Math.random() * 0x202020 ) );
+	
+	/*var directionalLight = new THREE.DirectionalLight( Math.random() * 0xffffff );
+	directionalLight.position.x = Math.random() - 0.5;
+	directionalLight.position.y = Math.random() - 0.5;
+	directionalLight.position.z = Math.random() - 0.5;
+	directionalLight.position.normalize();
+	scene.addLight( directionalLight );*/
+	
+	var pointLight = new THREE.PointLight(0xFFFFFF, 1);
+	pointLight.position.x = 100;
+	pointLight.position.y = 400;
+	pointLight.position.z = 200;
+	scene.addLight(pointLight);
+
+	// objects
+	pln = new THREE.Mesh(
+		new Plane(1000, 1000, 20, 20),
+		new THREE.MeshBasicMaterial({color:0xAAAAAA, wireframe:true, wireframeLinewidth:1})
+	);
+	pln.geometry.id = 'plane';
+	pln.rotation.x = Math.PI * -0.5;
+	pln.position.y = -100;
+	scene.addObject(pln);
+	
+	box = new GS.Box(scene, 200, 200, 200);
+	
+	//box.moveFaceDelta(1, [100, 0, 0] );	// face 1 = right one
+	//box.moveFaceOutward(1, 100);
+	//box.moveFaceDirection(1, 0, 100);		// edge 0 = closest to the cam
+	
+	//box.extrudeFace(1, 100);
+	//box.extrudeFaceDelta(1, [100, 50, 0]);
+	
+	//box.bevelFace(1, 100);
+	//box.bevelExtrudedFace(1, 100);
+	
+	//box.splitFaceLoop( new GS.OrderedPair(0, 3) );
+	
+	//box.moveEdgeDelta( new GS.OrderedPair(2, 3), [100, 0, 50] );
+	//box.moveEdgeOutward( new GS.OrderedPair(2, 3), 100 );
+	//box.moveEdgeDirection( new GS.OrderedPair(2, 3), 0, 100 );
+	
+	//box.printEdges();
+	
+	//obj = box.mesh;
+	
+	//box.printEdgeMap();
+	
+	//scene.addObject(obj);
+	
+	//vVwr = new GS.VerticesViewer(box.geo, scene);
+	
+	container.appendChild(renderer.domElement);
+	
+	// events
+	document.addEventListener('keydown', onDown, false);
+	container.addEventListener('mousedown', onDown2, false);
+	container.addEventListener('mouseup', onDown2, false);
+}
+
+function onDown(event) {
+	var k = event.keyCode;
+	if		(k === 37) objRotSpd -= 0.02;
+	else if (k === 39) objRotSpd += 0.02;
+}
+
+function onDown2(event) {
+	var mouseIdx = (event.type === 'mousedown') ? 0 : 1;
+	//if (mouseIdx === 0) mouseFaceIds = [undefined, undefined];
+	
+	var pos = [
+		event.clientX - container.offsetLeft,
+		event.clientY - container.offsetTop
+	];
+	
+	var vector = new THREE.Vector3(
+		  (pos[0] / winDims[0]) * 2 - 1,
+		- (pos[1] / winDims[1]) * 2 + 1,
+		0.5
+	);
+	
+	projector.unprojectVector(vector, camera);
+	var ray = new THREE.Ray(
+		camera.position,
+		vector.subSelf(camera.position).normalize()
+	);
+	
+	var geo, f, faceNr, FC, fc, intersect, intersects = ray.intersectScene(scene);
+	a:for (var i = 0; i < intersects.length; ++i) {
+		intersect = intersects[i];
+		var geo = intersect.object.geometry;
+		if (geo.id.substring(0, 2) !== 'GS') break;
+		
+		// determine faceNr...
+		faceNr = undefined;
+		FC = intersect.face;
+		for (f = 0; f < geo.faces.length; ++f) {
+			fc = geo.faces[f];
+			if (FC.a===fc.a && FC.b===fc.b && FC.c===fc.c && FC.d===fc.d) {
+				faceNr = f;
+				break a;
+			}
+		}
+
+	}
+	
+	//console.log([geo.id, faceNr]);
+	mouseFaceIds[mouseIdx] = faceNr;
+	if (mouseIdx === 1) console.log(mouseFaceIds);
+}
+
+
+function animate() {
+	box.mesh.rotation.y += objRotSpd;
+	requestAnimationFrame(animate);
+	render();
+}
+
+function render() {
+	renderer.render(scene, camera);
+}
+
+function op(opName) {
+	console.log(opName);
+	
+	var face = mouseFaceIds[0];
+	var edge = new GS.OrderedPair(mouseFaceIds[0], mouseFaceIds[1]);
+	
+	switch (opName) {
+		case 'mvFcOut':	case 'mvFcDir':	case 'mvFcDlt':
+		case 'extrude':	case 'bevelEx':	case 'extDlt':	case 'bevel':
+			if (face === undefined) alert('Must select a face first!');
+			console.log('FACE: ' + face);
+			break;
+		
+		case 'splitFL':	case 'mvEdDlt':
+		case 'mvEdOut':	case 'mvEdDst':
+			if (edge.length() !== 2) alert('Must select an edge first!');
+			console.log('EDGE: ' + edge);
+			break;
+	}
+	
+	var dst = parseFloat( document.getElementById('paramDst').value );
+	var dlt = [
+		parseFloat( document.getElementById('paramDlt1').value ),
+		parseFloat( document.getElementById('paramDlt2').value ),
+		parseFloat( document.getElementById('paramDlt3').value )
+	];
+	var dir = parseInt( document.getElementById('paramDir').value, 10 );
+	
+	if (opName === 'genUndo') {
+		if (opHistory.past.length === 0)	alert('No more steps to undo!');
+		else {
+			opHistory.future.push( new GS.ShapeMemento(box) );
+			opHistory.past.pop().restore();
+		}
+		return;
+	}
+	else if (opName === 'genRedo') {
+		if (opHistory.future.length === 0)	alert('No more steps to redo!');
+		else {
+			opHistory.past.push( new GS.ShapeMemento(box) );
+			opHistory.future.pop().restore();
+		}
+		return;
+	}
+	else {
+		opHistory.past.push( new GS.ShapeMemento(box) );
+	}
+	
+	switch (opName) {
+		case 'mvFcOut':		box.moveFaceOutward(face, dst);			break;
+		case 'mvFcDir':		box.moveFaceDirection(face, dir, dst);	break;
+		case 'mvFcDlt':		box.moveFaceDelta(face, dlt);			break;
+		
+		case 'extrude':		box.extrudeFace(face, dst);				break;
+		case 'bevelEx':		box.bevelExtrudedFace(face, dst);		break;
+		case 'extDlt':		box.extrudeFaceDelta(face, dst);		break;
+		case 'bevel':		box.bevelFace(face, dst);				break;
+		
+		case 'splitFL':		box.splitFaceLoop(edge);				break;
+		
+		case 'mvEdDlt':		box.moveEdgeOutward(edge, dlt);			break;		
+		case 'mvEdOut':		box.moveEdgeDelta(edge, dlt);			break;
+		case 'mvEdDst':		box.moveEdgeDirection(edge, dir, dst);	break;
+		
+		default:			alert('Unsupported operation: "' + opName + '"!');
+	}
+	
+	opHistory.future = [];
+}
+
+function gogogo() {
+	init();
+	animate();
+	//render();
+}
+
+setTimeout(gogogo, 300);
+
+
+		</script>
+	</body>
+</html>

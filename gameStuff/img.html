@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>img</title>
+		
+		<style type="text/css">
+			body {background-color: #667;}
+			#cvs {
+				position: absolute;
+				
+				/*-webkit-transform: scale3d(2.0, 2.0, 1.0);
+				-webkit-transform-origin: 0 0 0;*/
+			}
+		</style>
+	</head>
+	
+	<body>
+		<canvas id="cvs" />
+		
+		<script type="text/javascript" src="aux.js"></script>
+		<script type="text/javascript" src="img.js"></script>
+		
+		<script type="text/javascript">
+			loadImageToCanvas('tileset.png', 'cvs', function(c, img, w, h) {
+				var dt = c.getImageData(0, 0, w, h);
+				
+				//grayscaleImage(dt, w, h);
+				//shiftHue(dt, w, h, 270);
+				//entransparent(dt, w, h);
+				
+				c.putImageData(dt, 0, 0);
+			});
+		</script>
+	</body>
+</html>

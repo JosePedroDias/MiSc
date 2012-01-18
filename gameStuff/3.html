@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>3 - tile-based world</title>
+		
+		<style type="text/css">
+			body {background-color: #667;}
+			#cvs {
+				position: absolute;
+				
+				/*-webkit-transform: scale3d(2.0, 2.0, 1.0);
+				-webkit-transform-origin: 0 0 0;*/
+			}
+		</style>
+	</head>
+	
+	<body>
+		<canvas id="cvs" width="640" height="480"/>
+		
+		<img id="tiles" src="tileset.png"/>
+		
+		<script type="text/javascript" src="world.js"></script>
+		<script type="text/javascript" src="agent1.js"></script>
+		<script type="text/javascript" src="predatorAgent.js"></script>
+		<script type="text/javascript" src="aux.js"></script>
+		<script type="text/javascript" src="img.js"></script>
+		<script type="text/javascript" src="map.js"></script>
+		<script type="text/javascript" src="map1.js"></script>
+		
+		<script type="text/javascript">
+			var cvs = document.getElementById('cvs');
+			var c = cvs.getContext('2d');
+			
+			var tiles = document.getElementById('tiles');
+			IMG.init( c );
+			IMG.loadTileSet('a', tiles, [16, 16], [1, 1], [1, 1]);
+			
+			var m = new Map(30, 20);
+			
+			m.cells = cells;	// from map1.js
+						
+			WORLD('cvs', [m]);
+			
+			/* keys: cursors, s, mouse */
+		</script>
+	</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>Perlin Noise</title>
+		
+		<style type="text/css">
+			body {background-color: #667;}
+			#cvs {position: absolute;}
+		</style>
+	</head>
+	
+	<body>
+		<canvas id="cvs"/>
+		
+		<script type="text/javascript" src="img.js"></script>
+		<script type="text/javascript" src="aux.js"></script>
+		
+		<script type="text/javascript">
+			var w = 512, h = 256;
+			var numOctaves = 6;
+			
+			var i = new interpolator();
+			
+			/*i.addRGB(0,	[0,		0,		0]);
+			i.addRGB(1,	[255,	255,	255]);*/
+			
+			/*i.addRGB(0,	[0,		0,		0]);
+			i.addRGB(0.5,	[255,	0,		0]);
+			i.addRGB(1,	[255,	255,	0]);*/
+			
+			i.addRGB(0,		[64,	128,	255]);
+			i.addRGB(0.4,	[64,	128,	255]);	// sea
+			i.addRGB(0.5,	[220,	220,	100]);	// sand
+			i.addRGB(0.6,	[0,		200,	0]);	// grass
+			i.addRGB(1,		[255,	255,	255]);	// snow
+			
+
+			
+			var cvs = document.getElementById('cvs');
+			cvs.setAttribute('width', w);
+			cvs.setAttribute('height', h);
+			var c = cvs.getContext('2d');
+			
+			//var noise = generateGradient(w, h);
+			//var noise = generateWhiteNoise(w, h);
+			//var noise = generateSmoothNoise(generateWhiteNoise(w, h), w, h, 4);
+			var noise = generatePerlinNoise(w, h, numOctaves);
+			
+			//adjustLevels(noise, w, h, 0.5, 1);
+			//adjustLevels(noise, w, h, 0.4, 0.9);
+			
+			renderNoise(noise, w, h, c);//, i);
+			
+			/*var dt = c.getImageData(0, 0, w, h);
+			threshold(dt, w, h, 128);
+			c.putImageData(dt, 0, 0);*/
+		</script>
+	</body>
+</html>

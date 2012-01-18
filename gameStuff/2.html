@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>2 - predator agent on continuous world</title>
+		
+		<style type="text/css">
+			body {background-color: #667;}
+			#cvs {border: 1px solid #CCC; position: absolute;}
+		</style>
+	</head>
+	
+	<body>
+		<canvas id="cvs" width="640" height="480"/>
+		
+		<script type="text/javascript" src="world.js"></script>
+		<script type="text/javascript" src="agent1.js"></script>
+		<script type="text/javascript" src="predatorAgent.js"></script>
+		<script type="text/javascript" src="aux.js"></script>
+		
+		<script type="text/javascript">
+			var ag1 = new Agent();
+			ag1.color = '#00A';
+			ag1.pos = [30, 240];
+			
+			/*var ag2 = new Agent();
+			ag2.keys.fw = 69;	// E
+			ag2.keys.bw = 68;	// D
+			ag2.keys.lf = 83;	// S
+			ag2.keys.rt = 70;	// F
+			ag2.color = '#A00';
+			ag2.pos = [610, 240];
+			ag2.angle = Math.PI;*/
+			
+			var ag2 = new PredatorAgent(ag1);
+			ag2.pos = [610, 240];
+			
+			var ag3 = new PredatorAgent(ag1);
+			ag3.pos = [320, 460];
+			
+			WORLD('cvs', [ag1, ag2, ag3]);
+		</script>
+	</body>
+</html>

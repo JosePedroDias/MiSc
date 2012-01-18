@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>bejeweled</title>
+		<style type="text/css">
+			body {
+				background-color: #000;
+				margin: 0px;
+				padding: 0px 420px;
+			}
+			
+			#dbg {
+				color: #FFF;
+				font-family: monospace;
+				font-size: 11px;
+				width: 500px;
+				overflow: hidden;
+				border: 1px solid #444;
+			}
+		</style>
+		<script src="raphael.js"></script>
+		<script src="raphael.shapes.js"></script>
+		<script src="bejeweled.js"></script>
+	</head>
+	
+	<body>
+		<div id="root"></div>
+		
+		<button onclick="bj.debugClear()">		clear debug</button>
+		<button onclick="bj.restart()">			refill</button>
+		<button onclick="bj.detectSequences()">	detect sequences</button>
+		
+		<div id="dbg"></div>
+		
+		<script type="text/javascript">
+			var bj = new BJWLD('root');
+			bj.create();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+	</head>
+	
+	<body onload="draw()">
+		<canvas id="cvs" width="640" height="480"/>
+		
+		<script type="text/javascript">
+			var c = document.getElementById('cvs').getContext('2d');
+			
+			function draw() {
+				
+				// rects and styles
+				c.fillStyle = 'rgba(255, 0, 128, 0.5)';
+				c.fillRect(  10, 10, 90, 60);		// x, y, w, h
+				c.clearRect( 20, 20, 70, 40);		// x, y, w, h
+				c.strokeStyle = '#FFF';
+				c.strokeRect(15, 15, 80, 50);		// x, y, w, h
+				
+				// paths
+				c.beginPath();
+				c.moveTo(75, 50);
+				c.lineTo(100, 75);
+				c.lineTo(100, 25);
+				c.fillStyle = 'rgb(0, 255, 128)';
+				c.fill();	// or stroke() . . . (close path is not required)
+				
+				//c.arcTo(x1, y1, x2, y2, radius)
+				//c.arc(x, y, radius, startAngle, endAngle, anticlockwise)
+				
+				// smiley face...
+				// arc (x, y, radius, startAngle, endAngle, anticlockwise)
+				c.beginPath();
+				c.arc(75, 75, 50, 0, Math.PI * 2, true); // Outer circle
+				c.moveTo(110, 75);
+				c.arc(75, 75, 35, 0, Math.PI, false);   // Mouth (clockwise)
+				c.moveTo(65, 65);
+				c.arc(60, 65, 5, 0, Math.PI*2, true);  // Left eye
+				c.moveTo(95, 65);
+				c.arc(90, 65, 5, 0, Math.PI * 2, true);  // Right eye
+				c.strokeStyle = '#F00';
+				//c.strokeWidth = 3;
+				c.stroke();
+				
+				// line properties
+				// to render perfectly, draw 1w at 0.5 or multiples of 2
+				c.lineWidth = 3;
+				c.lineCap = 'round';	// round butt square
+				c.lineJoin = 'round';	// round bevel miter
+				// c.miterLimit = num
+				
+				c.strokeStyle	= '#070';
+				c.fillStyle		= '#700';
+				for (var i = 0; i < 4; ++i) {
+					for (var j = 0; j < 3; ++j) {
+						c.beginPath();
+						var x				= 25 + j * 50;					// x coordinate
+						var y				= 25 + i * 50;					// y coordinate
+						var radius			= 20;							// arc radius
+						var startAngle		= 0;							// starting point on circle
+						var endAngle		= Math.PI + (Math.PI * j) / 2;	// end point on circle
+						var anticlockwise	= i % 2 !== 0;					// clockwise or anticlockwise
+						
+						c.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+						if (i > 1) {	c.fill();		}
+						else {			c.stroke();		}
+					}
+				}
+				
+				// other path tools
+				// c.quadraticCurveTo(cp1x, cp1y, x, y);
+				// c.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+				
+				// c.rect(x, y, width, height)	// adds rect to path
+				// c.roundedRect(ctx,12,12,150,150,15);
+				
+				// fonts
+				c.font = "20px Times New Roman";
+				c.fillStyle = "Black";
+				c.fillText("Sample String", 5, 30);
+				//c.textAlign = 'start end left right center'
+				//c.textBaseline = 'top hanging middle alphabetic ideographic bottom'
+				//c.fillText(string text, float x, float y, [Optional] float maxWidth)
+				//c.strokeText(text, x, y, [Optional] maxWidth)
+				//c.measureText(text)
+				
+				// gradients
+				// createLinearGradient(x1,y1,x2,y2)
+				// createRadialGradient(x1,y1,r1,x2,y2,r2)
+				
+				c.beginPath();
+				c.rect(10, 10, 20, 20);
+				var lr = c.createLinearGradient(10, 10, 30, 30);
+				lr.addColorStop(0, '#F00');
+				lr.addColorStop(0.5, '#FFF');
+				lr.addColorStop(1, '#00F');
+				c.fillStyle = lr;
+				c.fill();
+				
+				c.beginPath();
+				//c.rect(10, 10, 20, 20);
+				c.arc(20, 20, 10, 0, Math.PI*2);
+				var lr = c.createRadialGradient(20, 20, 0, 20, 20, 10);
+				lr.addColorStop(0, '#FF0');
+				lr.addColorStop(0.5, '#FFF');
+				lr.addColorStop(1, '#0FF');
+				c.fillStyle = lr;
+				c.fill();
+				
+				// c.globalAlpha = 0 to 1;
+				
+				// saves state of:
+				// transformations, clipping path, strokeStyle, fillStyle, globalAlpha, lineWidth, lineCap, lineJoin, miterLimit, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor, globalCompositeOperation
+				// save();
+				// restore();
+				
+				// transforms
+				// c.translate(x, y)
+				// c.rotate(angle);
+				// c.scale(x, y);
+				// c.transform(m11, m12, m21, m22, dx, dy);	// multiplies by current
+				// c.setTransform(m11, m12, m21, m22, dx, dy);	// replaces current
+				
+				//c = globalCompositeOperation = see https://developer.mozilla.org/en/Canvas_tutorial:Compositing
+				
+				// clipping
+				//.clip()	// same as fill but sets clipping
+				
+				// animation
+				//ctx.clearRect(0,0,300,300); // clear canvas, fill… stroke
+
+				
+				// images
+				/*var sun = new Image();
+				sun.src = 'images/earth.png';
+				c.drawImage(earth,-12,-12);
+				
+				c.drawImage(image, dx, dy, [dw], [dh])
+				c.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);	// blit*/
+
+				
+				// patterns
+				//c.createPattern(image, repetition)	// repeat repeat-x repeat-y no-repeat
+				
+				
+				// data access
+				/*c.createImageData(sw, sh)		// creates imageData
+				c.getImageData(sx, sy, sw, sh)	// creates imageData
+				c.putImageData(imagedata, dx, dy, [Optional] dirtyX, dirtyY, dirtyWidth, dirtyHeight)*/
+				//imageData has .width, .height, .data
+			}
+		</script>
+	</body>
+</html>

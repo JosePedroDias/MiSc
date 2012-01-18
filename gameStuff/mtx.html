@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>mtx</title>
+		
+		<style type="text/css">
+			body {background-color: #667;}
+		</style>
+	</head>
+	
+	<body>
+		<script type="text/javascript" src="mtx.js"></script>
+		
+		<script type="text/javascript">
+		
+			// INITS…
+			var a = $V([2, 3]).print('a');
+			var b = $V([2, 3], 1).print('b with scalar 1');
+			var c = $V([2, 3], [1, 2, 3, 4, 5, 6]).print('c with init array');
+			var d = $V([2, 2], 'i').print('d with "i" for identity matrix');
+			
+			
+			// ACCESSORS
+			console.log('c 0,0 is ' + c.get(0, 0)	);	// 1
+			console.log('c 1,0 is ' + c.get(1, 0)	);	// 4
+			console.log('c 0,1 is ' + c.get(0, 1)	);	// 2
+			d.set(1, 1, 4).print('d after set 1,1 = 4');
+			
+			
+			// BASIC OPS
+			b.add( c).print('b + c');
+			b.sub( c).print('b - c');
+			c.mus(2).print('c * 2');
+			
+			var g = $V([2, 2], [1, 2, 3, 4]).print('g');
+			var h = $V([2, 2], [5, 6, 7, 8]).print('h');
+			g.mul(h).print('g * h');
+			
+			var i = $V([1,2], [1,2]).print('i');
+			var j = $V([2,1], [3,4]).print('j');
+			i.mul(j).print('i * j');
+			j.mul(i).print('j * i');
+			
+			
+			// NORMAL AND LENGTH
+			var e = $V(2, [2, 1]).print('e');		// note how array can be ommited for 1 dim arrays…
+			console.log('e has length ' + e.len()	);
+			e.normal().print('e normalized');
+			
+			
+			// CLONE AND TRANSPOSE
+			var f = c.clone().print('f is a clone of c');
+			f.t().print('f transposed');
+			
+			
+			// DOT PRODUCT
+			var k = $V([2], [1, 2]).print('k');
+			var l = $V([2], [2, 3]).print('l');
+			console.log('k dot l is ' + k.dot(l)	);
+			
+			
+			// ROTATION MATRIX
+			var l = $V([2,2], 'i').rot(Math.PI/2).print('l is a rotation matrix of 90 deg');
+			var m = $V([2,1], [3,4]).print('m is a point in R2');
+			l.mul(m).print('m after rotation');
+			
+			$V([3,3], 'i').rot(Math.PI/6, 0).print('rot 30 deg x');
+			$V([3,3], 'i').rot(Math.PI/6, 1).print('rot 30 deg y');
+			$V([3,3], 'i').rot(Math.PI/6, 2).print('rot 30 deg z');
+		</script>
+	</body>
+</html>

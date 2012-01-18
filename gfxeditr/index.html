@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		
+		<title>gfxeditr</title>
+		
+		<link rel="stylesheet" type="text/css" href="gfxeditr.css">
+	</head>
+
+	<body>
+		<svg id="canvas" version="1.1" xmlns="http://www.w3.org/2000/svg" width="640" height="480">
+			<path id="sel" d="M 0 0" stroke="#FAA" stroke-width="2" />
+		</svg>
+		
+		<div id="tools">
+			<p>
+				<button id="loadBtn">load</button>
+				<button id="saveBtn">save</button>
+			</p>
+			
+			<p id="styles">
+				<label for="fillBtn">fill:</label>
+				<button id="fillBtn"></button>
+				
+				<label for="strokeBtn">stroke:</label>
+				<button id="strokeBtn"></button>
+
+				<label for="stroke-widthBtn">width:</label>
+				<button id="stroke-widthBtn"></button>
+			</p>
+			
+			<p>
+				<select id="createSel">
+					<option value=""		disabled="disabled">&lt; create &gt;</option>
+					<option value="circle"	>circle</option>
+					<option value="rect"	>rectangle</option>
+				</select>
+			
+				<span id="toggleOps">
+					<button id="selectBtn"	class="selected">select</button>
+					<button id="moveBtn"	>move</button>
+					<button id="deleteBtn"	>delete</button>
+				</span>
+			</p>
+			
+			<p id="dialog">
+			</p>
+		</div>
+		
+		<script type="text/javascript" src="gfxeditr.js"></script>
+	</body>
+</html>

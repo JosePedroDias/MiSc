@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+	<head>
+		<title>sprite testing...</title>
+		
+		<style type="text/css">
+			#screen {
+				width: 640px;
+				height: 480px;
+				border: 2px solid #000;
+				background-color: #7D9600;
+				position: relative;
+				top: 0px;
+				left: 0px;
+			}
+			
+			#powerBar {
+				height: 16px;
+				border: 2px solid #FF0;
+				background-color: #F00;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div id="screen">
+			<div id="powerBar"></div>
+		</div>
+		
+		<script type="text/javascript">
+			
+			/* SPRITE MANIPULATION */
+			
+			
+			function shift(id, dx, dy, isRelative) {
+				var imgEl = document.getElementById(id);
+				if (isRelative) {
+					var bpAttr = imgEl.style['background-position'];
+					var parts = bpAttr.split(' ');
+					dx += parseInt(parts[0], 10);
+					dy += parseInt(parts[1], 10);
+				}
+				imgEl.style['background-position'] = dx + 'px ' + dy + 'px';
+			}
+			
+			
+			function move(id, dx, dy, isRelative) {
+				var imgEl = document.getElementById(id);
+				if (isRelative) {
+					var x = parseInt(imgEl.style['left'], 10);
+					var y = parseInt(imgEl.style['top'],  10);
+					imgEl.style['left'] = (x + dx) + 'px';
+					imgEl.style['top']  = (y + dy) + 'px';
+				}
+				else {
+					imgEl.style['left'] = dx + 'px';
+					imgEl.style['top']  = dy + 'px';
+				}
+			}
+			
+			
+			function createSprite(id, px, py, bx, by) {
+				var screenEl = document.getElementById('screen');
+				var imgEl = document.createElement('div');
+				imgEl.setAttribute('id', id);
+				imgEl.style['background-image'] = "url('players2.png')";
+				imgEl.style['background-repeat'] = 'no-repeat';
+				imgEl.style['background-position'] = bx + 'px ' + by + 'px';
+				imgEl.style['position'] = 'absolute';
+				imgEl.style['left'] = px + 'px';
+				imgEl.style['top']  = py + 'px';
+				imgEl.style['width']  = '32px';
+				imgEl.style['height'] = '32px';
+				screenEl.appendChild(imgEl);
+			}
+			
+			
+			/* KEYBOARD HANDLING */
+			
+			var keys = {
+				69:false,	// E
+				68:false,	// D
+				73:false,	// I
+				79:false,	// O
+				32:false	// SPACE BAR
+			};
+			var dir = [0, 0];
+			var dirInt = [0, 0];	// interpolated position
+			var spacePressed = false;
+			var power = 0;			// interpolated power
+			
+			var pos = [64, 64];		// current position
+			
+			
+			function kbHandler(e) {
+				var e = e || event;
+				var code = e.keyCode;
+				var isDown = e.type === 'keydown';
+				
+				if      (code === 69) {	keys[69] = isDown;	}
+				else if (code === 68) {	keys[68] = isDown;	}
+				else if (code === 73) {	keys[73] = isDown;	}
+				else if (code === 79) {	keys[79] = isDown;	}
+				else if (code === 32) {	keys[32] = isDown;	}
+				
+				dir[1] = (keys[69] ? -1 : 0) + (keys[68] ? 1 : 0);
+				dir[0] = (keys[73] ? -1 : 0) + (keys[79] ? 1 : 0);
+				spacePressed = keys[32];
+				
+				return false;
+			}
+			
+			document.onkeyup   = kbHandler;
+			document.onkeydown = kbHandler;
+			
+			
+			/* ANIMATION */
+			var frameNr = 0;
+			var animKey = 0;
+			var m = -32;
+			var animK = 'd';
+			var animOff = {
+				'u' : [ [0*m, 0*m], [0*m, 1*m], [0*m, 0*m], [0*m, 2*m] ],
+				'd' : [ [0*m, 3*m], [1*m, 0*m], [0*m, 3*m], [1*m, 1*m] ],
+				'r' : [ [1*m, 2*m], [1*m, 3*m], [1*m, 2*m], [2*m, 0*m] ],
+				'l' : [ [2*m, 1*m], [2*m, 2*m], [2*m, 1*m], [2*m, 3*m] ],
+				'dl': [ [3*m, 1*m], [3*m, 0*m], [3*m, 1*m], [3*m, 2*m] ],
+				'dr': [ [4*m, 0*m], [3*m, 3*m], [4*m, 0*m], [4*m, 1*m] ],
+				'ul': [ [4*m, 3*m], [4*m, 2*m], [4*m, 3*m], [5*m, 0*m] ],
+				'ur': [ [5*m, 2*m], [5*m, 1*m], [5*m, 2*m], [5*m, 3*m] ]
+			}
+			
+			function onTimer() {
+				// interpolate movement and power
+				var p = spacePressed ? 1 : 0;
+				power = 0.7 * power + 0.3 * p;
+				dirInt[0] = 0.7 * dirInt[0] + 0.3 * dir[0];
+				dirInt[1] = 0.7 * dirInt[1] + 0.3 * dir[1];
+				
+				//console.log( 'dir: ' + dirInt[0].toFixed(2) + ', ' + dirInt[1].toFixed(2) + ', power:' + power.toFixed(2) );
+				var powerbarEl = document.getElementById('powerBar');
+				powerbarEl.style['width'] = parseInt(128 * power, 10) + 'px';
+				
+				// move sprite
+				pos[0] += dirInt[0]*3;
+				pos[1] += dirInt[1]*3;
+				move('img01', parseInt(pos[0], 10), parseInt(pos[1], 10));
+				
+				// animate sprites
+				++frameNr;
+				var a = frameNr % 10;
+				
+				if (a === 0) {
+					++animKey;
+					if (animKey > 3) animKey = 0;
+					
+					var k = ((dirInt[1] < -0.5) ? 'u' : (dirInt[1] > 0.5) ? 'd' : '') + ((dirInt[0] < -0.5) ? 'l' : (dirInt[0] > 0.5) ? 'r' : '');
+					if (k.length != 0) animK = k;
+					
+					var off = animOff[animK][animKey];
+					shift('img01', off[0], off[1]);
+				}
+			}
+			
+			setInterval(onTimer, 20);
+			
+			createSprite('img01', 10, 20, 0, 0);
+			
+		</script>
+	</body>
+</html>

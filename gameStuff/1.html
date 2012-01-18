@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>1 - keyboard-driven motion on continuous world</title>
+		
+		<style type="text/css">
+			#cvs {border: 1px solid #AAA;}
+		</style>
+	</head>
+	
+	<body>
+		<canvas id="cvs" width="640" height="480"/>
+		
+		<script type="text/javascript">
+			var c = document.getElementById('cvs').getContext('2d');
+			
+			var r2d = 180 / Math.PI;
+			var pi2 = Math.PI * 2;
+			var frame = 0;
+			var kbReads = [];
+			var lastKey = 0;
+			
+			var player = {
+				pos:	[320, 240],
+				angle:	0,
+				speed:	0,
+				color:	'#739'
+			};
+			
+			function kbHandler(e) {
+				var e = e || event;
+				var code = e.keyCode;
+				var isDown = e.type === 'keydown';
+				kbReads[code] = isDown;
+				lastKey = code;	// for debugging
+				return false;
+			}
+
+			
+			function pathCross(sz) {
+				c.beginPath();
+				c.moveTo(-sz,   0);
+				c.lineTo( sz,   0);
+				c.moveTo(  0, -sz);
+				c.lineTo(  0,  sz);
+			}
+			
+			
+			function pathTriangle(sx, sy) {
+				c.beginPath();
+				c.moveTo( sx,   0);
+				c.lineTo(-sx, -sy);
+				c.lineTo(-sx,  sy);
+				c.lineTo( sx,   0);
+			}
+			
+			
+			function draw() {
+				// update key reads
+				if (kbReads[38]) {	player.speed += 0.4;	}
+				if (kbReads[40]) {	player.speed -= 0.4;	if (player.speed < 0) {	player.speed = 0;	}	}
+				if (kbReads[37]) {	player.angle -= 0.1;	}
+				if (kbReads[39]) {	player.angle += 0.1;	}
+				
+				
+				// update player
+				if (player.speed) {
+					player.pos[0] += player.speed * Math.cos(player.angle);
+					player.pos[1] += player.speed * Math.sin(player.angle);
+					if		(player.pos[0] < 0) {	player.pos[0] += 640;	}
+					else if	(player.pos[1] < 0) {	player.pos[1] += 480;	}
+					if		(player.pos[0] > 639) {	player.pos[0] -= 640;	}
+					else if	(player.pos[1] > 479) {	player.pos[1] -= 480;	}
+					if		(player.angle < 0) {	player.angle += pi2;	}
+					else if	(player.angle > pi2) {	player.angle -= pi2;	}
+				}
+				
+				
+				c.clearRect(0, 0, 640, 480);	// clear screen
+				//c.fillStyle = 'rgba(255, 255, 255, 0.1)';
+				//c.fillRect(0, 0, 640, 480);
+				
+				// draw player
+				c.save();
+				c.translate(	parseInt(player.pos[0], 10), parseInt(player.pos[1], 10));
+				c.rotate(player.angle);
+				pathTriangle(20, 12);
+				c.fillStyle = player.color;
+				c.fill();
+				c.restore();
+				
+				// debug info
+				c.textAlign = 'left';
+				c.textBaseline = 'top';
+				c.font = '18px Helvetica';
+				c.fillStyle = '#000';
+				//c.fillText('frame: ' + frame + ', key: ' + lastKey, 0, 0);
+				c.fillText(
+					'pos: ' + player.pos[0].toFixed(0) + ', ' + player.pos[1].toFixed(0) +
+					';   angle: ' + (player.angle * r2d).toFixed(0) + ' deg'
+				, 0, 0);
+				++frame;
+			}
+			
+			setInterval(draw, 1000/25);
+			document.onkeyup   = kbHandler;
+			document.onkeydown = kbHandler;
+		</script>
+	</body>
+</html>

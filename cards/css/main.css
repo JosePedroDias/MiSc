@@ -1,0 +1,96 @@
+body {
+	padding:	0;
+	margin:		0;
+	font-family:	Helvetica, Arial, sans;
+}
+
+button {
+	padding:	8px 16px;
+}
+
+.card {
+	position:	absolute;
+	transition-property:			left, top, opacity;
+	-webkit-transition-property:	left, top, opacity;
+	transition-duration:			.25s, .25s, .5s;
+	-webkit-transition-duration:	.25s, .25s, .5s;
+}
+
+.validCard:hover {
+	margin:			-4px 0 0 -4px;
+	border:			4px solid rgba(0, 255, 255, 0.75);	/* cyan */
+	border-radius:	6px;
+	cursor:			default;
+}
+
+.invalidCard {
+	opacity:		0.1;
+}
+
+.winningCard {
+	margin:			-4px 0 0 -4px;
+	border:			4px solid rgba(0, 0, 255, 0.5);	/* blue */
+	border-radius:	6px;
+	z-index:		500;
+}
+
+.trumpCard {
+	opacity:		0.80;
+}
+
+.playerLabel {
+	position:		absolute;
+	width:			71px;
+	text-align:		center;
+	color:			#FFF;
+	text-shadow:	2px 2px rgba(0, 0, 0, 0.5);
+}
+
+.horizontal {
+	margin-top:	-20px;
+}
+
+.horizontal2 {
+	margin-top: 96px;
+}
+
+.vertical {
+	margin-top: -110px;
+}
+
+#table {
+	background-color:		#6C6;
+	position:				relative;
+	/*-webkit-perspective:	800;
+	perspective:			800;*/
+}
+
+#score {
+	font-weight:	bold;
+	font-size:		18px;
+	right:			0px;
+	top:			0px;
+	width:			64px;
+	text-align:		center;
+}
+
+#pointer {
+	position:			absolute;
+	width:				64px;
+	height:				64px;
+	right:				0px;
+	top:				24px;
+	background-image:	url('../img/next.png');
+	background-repeat:	no-repeat;
+}
+
+#pointer.next0 {	background-position:	   0px 0px;	}
+#pointer.next1 {	background-position:	 -64px 0px;	}
+#pointer.next2 {	background-position:	-128px 0px;	}
+#pointer.next3 {	background-position:	-192px 0px;	}
+
+
+
+
+
+
