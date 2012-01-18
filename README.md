@@ -1,1 +1,3 @@
-hello world
+I'm tired of losing projects so this is my attempt at collecting the most interesting experiments
+**I haven't lost** done outside of work hours.
+These are either too simple or plain incomplete...
